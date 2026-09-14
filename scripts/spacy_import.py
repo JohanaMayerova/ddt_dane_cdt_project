@@ -1,10 +1,14 @@
 import spacy
+from pathlib import Path
 
-nlp = spacy.load("da_core_news_lg")
-import da_core_news_lg
-nlp = da_core_news_lg.load()
-#print(nlp.pipe_names)
-pipes_to_remove = ["lemmatizer", "attribute_ruler"]
-for pipe in pipes_to_remove:
-    nlp.remove_pipe(pipe)
-nlp.to_disk("./training/spacy_da_core_news_lg/model-best")
+models = ["da_core_news_trf"]
+pipes_to_remove = ["attribute_ruler"]
+
+for model in models:
+    nlp = spacy.load(model)
+    for pipe in pipes_to_remove:
+        if pipe in nlp.pipe_names:
+            nlp.remove_pipe(pipe)
+    out = Path(f"./training/spacy_{model}/model-best")
+    out.mkdir(parents=True, exist_ok=True)
+    nlp.to_disk(out)

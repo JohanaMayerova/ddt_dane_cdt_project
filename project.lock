@@ -130,33 +130,33 @@ combine:
 train:
   cmd: python -m weasel run train
   script:
-    - python -m spacy train  configs/dacy_tiny.cfg --output training/dacy-tiny-CoNLL2017
+    - python -m spacy train  configs/dacy_medium_new_spacy_copy.cfg --output training/dacy_medium_trf_DanskBERT_spacylike
       --gpu-id 0  --paths.train corpus/cdt_ddt/train.spacy  --paths.dev corpus/cdt_ddt/dev.spacy  --nlp.lang=da
   deps:
     - path: corpus/cdt_ddt/train.spacy
-      md5: 41f14c28f44fae87e6d7feb7ec5fc256
+      md5: 64bd2df1765c86375b89127d922a1d64
     - path: corpus/cdt_ddt/dev.spacy
-      md5: 52fced9423635ff41bd1d7a2a4e7c08e
-    - path: configs/dacy_tiny.cfg
-      md5: 84da69a6f160c5b88055cdc1cc209225
+      md5: 3438c1b3a1bfb3f882e44a98adfd4fa2
+    - path: configs/dacy_medium_new_spacy_copy.cfg
+      md5: 4a53a856259f5ce53cffbde074f1b549
     - path: assets/.da_core_news_lg_installed
       md5: d41d8cd98f00b204e9800998ecf8427e
   outs:
-    - path: training/dacy-tiny-CoNLL2017/model-best
-      md5: 15b49dd98e7b0cc7e9b50f4c36b47a62
+    - path: training/dacy_medium_trf_DanskBERT_spacylike/model-best
+      md5: 71388415bcd602731f85d9415a88562a
 evaluate:
   cmd: python -m weasel run evaluate
   script:
-    - python -m spacy evaluate  ./training/dacy-tiny-CoNLL2017/model-best  ./corpus/cdt_ddt/test.spacy  --output
-      ./metrics/dacy-tiny-CoNLL2017.json  --gpu-id 0
+    - python -m spacy evaluate  ./training/dacy_medium_trf_DanskBERT_spacylike/model-best  ./corpus/cdt_ddt/test.spacy  --output
+      ./metrics/dacy_medium_trf_DanskBERT_spacylike.json  --gpu-id 0
   deps:
-    - path: training/dacy-tiny-CoNLL2017/model-best
-      md5: 15b49dd98e7b0cc7e9b50f4c36b47a62
+    - path: training/dacy_medium_trf_DanskBERT_spacylike/model-best
+      md5: 71388415bcd602731f85d9415a88562a
     - path: corpus/cdt_ddt/test.spacy
-      md5: 230f52c7df0a868358848bb6631a98dc
+      md5: 62a0906fbb9f753de948c6fed26f95bb
   outs:
-    - path: metrics/dacy-tiny-CoNLL2017.json
-      md5: 3d079679d133492f9ff4c69b788f8343
+    - path: metrics/dacy_medium_trf_DanskBERT_spacylike.json
+      md5: a0607f365be2bff28797982d835c45b8
 prepare_gpu:
   cmd: python -m weasel run prepare_gpu
   script:
@@ -200,3 +200,41 @@ install_vectors:
   outs:
     - path: assets/.da_core_news_lg_installed
       md5: d41d8cd98f00b204e9800998ecf8427e
+install_vectors_lg:
+  cmd: python -m weasel run install_vectors_lg
+  script:
+    - pip install assets/da_core_news_lg-3.8.0-py3-none-any.whl --no-deps
+    - touch assets/.da_core_news_lg_installed
+  deps:
+    - path: assets/da_core_news_lg-3.8.0-py3-none-any.whl
+      md5: df52d10a14e7ed04d399f136d72d7389
+  outs:
+    - path: assets/.da_core_news_lg_installed
+      md5: d41d8cd98f00b204e9800998ecf8427e
+evaluate_llm:
+  cmd: python -m weasel run evaluate_llm
+  script:
+    - python -m spacy assemble configs/llm_ner.cfg training/llm-ner --code scripts/llm_registry.py
+    - python -m spacy evaluate ./training/llm-ner ./corpus/cdt_ddt/test.spacy --output
+      ./metrics/llm-ner.json --code scripts/llm_registry.py --gpu-id -1
+  deps:
+    - path: configs/llm_ner.cfg
+      md5: 65bd441e1bca2137dd0086d0075475de
+    - path: assets/dane_fewshot.yml
+      md5: d569129561f88b6ba471e3fef047c888
+    - path: corpus/cdt_ddt/test.spacy
+      md5: 62a0906fbb9f753de948c6fed26f95bb
+  outs:
+    - path: metrics/llm-ner.json
+      md5: 63d34256700808d133f5bd9b37738a9e
+package:
+  cmd: python -m weasel run package
+  script:
+    - python -m spacy package  training/dacy_medium_trf/model-best packages  --name
+      dacy_medium_trf  --version 2.9.0 --build wheel --force
+  deps:
+    - path: training/dacy_medium_trf/model-best
+      md5: 5d91938020b080598206ec5122e7120d
+  outs:
+    - path: packages/da_dacy_medium_trf-2.9.0/dist/da_dacy_medium_trf-2.9.0.tar.gz
+      md5: null

@@ -1,3 +1,5 @@
+My workspace for working on DaCy. Ignore the auto-generated text below.
+
 <!-- WEASEL: AUTO-GENERATED DOCS START (do not remove) -->
 
 # 🪐 Weasel Project: Part-of-speech Tagging & Dependency Parsing (Universal Dependencies)

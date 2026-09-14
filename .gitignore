@@ -3,7 +3,8 @@ corpus
 training
 packages
 .venv
+.env
 .venv-cuda13
 .venv-old
-env.txt
+env_command.txt
 __pycache__dacy_wheels/
